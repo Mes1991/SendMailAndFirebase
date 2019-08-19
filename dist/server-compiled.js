@@ -25,7 +25,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 (0, _dotenv.config)();
 var _process$env = process.env,
     PORT = _process$env.PORT,
-    SECRET = _process$env.SECRET,
     EMAIL_PASSWORD = _process$env.EMAIL_PASSWORD,
     EMAIL_USER = _process$env.EMAIL_USER,
     CC = _process$env.CC,
@@ -42,26 +41,27 @@ var FIREBASECONFIG = {
   authDomain: AUTHDOMAIN,
   databaseURL: DATABASEURL,
   projectId: PROJECTID,
-  storageBucket: "",
+  storageBucket: '',
   messagingSenderId: MESSAGINGSENDERID,
-  appId: APPID
+  appId: APPID // Initiualize firebase app on the server
+
 };
+var db = firebase.initializeApp(FIREBASECONFIG);
 app.post('/senData',
 /*#__PURE__*/
 function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(req, res) {
-    var secret, data, sendMail, sendFirebase;
+    var secret, data, sendMail;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            console.log('received');
             secret = req.headers.authorization || null;
 
             if (!(!secret || secret !== process.env.SECRET)) {
-              _context.next = 4;
+              _context.next = 3;
               break;
             }
 
@@ -69,7 +69,7 @@ function () {
               error: 'No credentials sent!'
             }));
 
-          case 4:
+          case 3:
             data = {
               nombre: req.body.nombre || null,
               telefono: req.body.telefono || null,
@@ -79,17 +79,17 @@ function () {
               to: req.body.to || null // const sendMail = await mailer(data)
 
             };
-            sendMail = false;
-            _context.next = 8;
+            sendMail = false; // const sendFirebase
+
+            _context.next = 7;
             return saveFirebase(data);
 
-          case 8:
-            sendFirebase = _context.sent;
+          case 7:
             res.status(200).json({
               mail: sendMail
             });
 
-          case 10:
+          case 8:
           case "end":
             return _context.stop();
         }
@@ -108,35 +108,33 @@ function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(data) {
-    var dbFire, refLog, currentDate, timestamp, dateString, randomString;
+    var refLog, currentDate, timestamp, dateString, randomString;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            if (!firebase.apps.length) {
-              dbFire = firebase.initializeApp(FIREBASECONFIG);
-              refLog = dbFire.database().ref('/logChatBot');
-              currentDate = new Date();
-              timestamp = currentDate.getTime();
-              dateString = formatDate(currentDate);
-              randomString = (0, _cryptoRandomString["default"])({
-                length: 4,
-                characters: '1234'
-              });
-              refLog.child(dateString).push({
-                nombre: data.nombre,
-                telefono: data.telefono,
-                cedula: data.cedula,
-                tipoDeGestion: data.tipoDeGestion,
-                email: data.email,
-                to: data.to,
-                fechaLog: dateString,
-                timestamp: timestamp,
-                random: randomString
-              });
-            }
+            refLog = db.database().ref('/logChatBot');
+            currentDate = new Date();
+            timestamp = currentDate.getTime();
+            dateString = formatDate(currentDate);
+            randomString = (0, _cryptoRandomString["default"])({
+              length: 4,
+              characters: '1234'
+            });
+            _context2.next = 7;
+            return refLog.child(dateString).push({
+              nombre: data.nombre,
+              telefono: data.telefono,
+              cedula: data.cedula,
+              tipoDeGestion: data.tipoDeGestion,
+              email: data.email,
+              to: data.to,
+              fechaLog: dateString,
+              timestamp: timestamp,
+              random: randomString
+            });
 
-          case 1:
+          case 7:
           case "end":
             return _context2.stop();
         }
@@ -155,7 +153,7 @@ function () {
   var _ref4 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee3(_ref3) {
-    var to, nombre, telefono, cedula, email, tipoDeGestion, transporter, mailOptions, info;
+    var to, nombre, telefono, cedula, email, tipoDeGestion, transporter, mailOptions;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -182,28 +180,27 @@ function () {
               to: to,
               subject: tipoDeGestion,
               cc: CC,
-              html: "<table>\n                <tr>\n                    <td>Nombre</td>\n                    <td>".concat(nombre, "</td>\n                </tr>\n                <tr>\n                    <td>Telefono</td>\n                    <td>").concat(telefono, "</td>\n                </tr>\n                <tr>\n                    <td># de cedula</td>\n                    <td>").concat(cedula, "</td>\n                </tr>\n                <tr>\n                    <td>Email</td>\n                    <td>").concat(email, "</td>\n                </tr>\n                <tr>\n                    <td>Tipo de consulta</td>\n                    <td>").concat(tipoDeGestion, "</td>\n                </tr>\n                <Table>\n                ") // send mail with defined transport object
+              html: "<table>\n              <tr>\n                  <td>Nombre</td>\n                  <td>".concat(nombre, "</td>\n              </tr>\n              <tr>\n                  <td>Telefono</td>\n                  <td>").concat(telefono, "</td>\n              </tr>\n              <tr>\n                  <td># de cedula</td>\n                  <td>").concat(cedula, "</td>\n              </tr>\n              <tr>\n                  <td>Email</td>\n                  <td>").concat(email, "</td>\n              </tr>\n              <tr>\n                  <td>Tipo de consulta</td>\n                  <td>").concat(tipoDeGestion, "</td>\n              </tr>\n              <Table>\n              ") // send mail with defined transport object
 
             };
             _context3.next = 6;
             return transporter.sendMail(mailOptions);
 
           case 6:
-            info = _context3.sent;
             return _context3.abrupt("return", true);
 
-          case 10:
-            _context3.prev = 10;
+          case 9:
+            _context3.prev = 9;
             _context3.t0 = _context3["catch"](1);
             console.error(_context3.t0);
             return _context3.abrupt("return", false);
 
-          case 14:
+          case 13:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[1, 10]]);
+    }, _callee3, null, [[1, 9]]);
   }));
 
   return function mailer(_x4) {
@@ -212,9 +209,9 @@ function () {
 }();
 
 var formatDate = function formatDate(date) {
-  var month = '' + (date.getMonth() + 1),
-      day = '' + date.getDate(),
-      year = date.getFullYear();
+  var month = '' + (date.getMonth() + 1);
+  var day = '' + date.getDate();
+  var year = date.getFullYear();
   if (month.length < 2) month = '0' + month;
   if (day.length < 2) day = '0' + day;
   return [year, month, day].join('-');
