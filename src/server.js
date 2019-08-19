@@ -1,15 +1,17 @@
-import express  from 'express'
+import express from 'express'
 import * as firebase from 'firebase'
-import {config} from 'dotenv'
+import { config } from 'dotenv'
 import cryptoRandomString from 'crypto-random-string';
-import "core-js/stable";
+import 'core-js/stable';
 import "regenerator-runtime/runtime";
 
 // Emails
 import nodemailer from 'nodemailer'
 
 config()
-const {PORT, SECRET, EMAIL_PASSWORD, EMAIL_USER, CC, 
+const {
+  PORT,
+  SECRET, EMAIL_PASSWORD, EMAIL_USER, CC, 
     APIKEY, AUTHDOMAIN, DATABASEURL, PROJECTID, 
     MESSAGINGSENDERID, APPID
 } = process.env
@@ -28,7 +30,7 @@ const FIREBASECONFIG = {
 }
 
 app.post('/senData', async (req,res) => {
-    
+    console.log('received')
     var secret = req.headers.authorization || null;
     if(!secret || secret !== process.env.SECRET) {
         return res.status(403).json({ error: 'No credentials sent!' });

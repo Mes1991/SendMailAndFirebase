@@ -57,10 +57,11 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
+            console.log('received');
             secret = req.headers.authorization || null;
 
             if (!(!secret || secret !== process.env.SECRET)) {
-              _context.next = 3;
+              _context.next = 4;
               break;
             }
 
@@ -68,7 +69,7 @@ function () {
               error: 'No credentials sent!'
             }));
 
-          case 3:
+          case 4:
             data = {
               nombre: req.body.nombre || null,
               telefono: req.body.telefono || null,
@@ -79,16 +80,16 @@ function () {
 
             };
             sendMail = false;
-            _context.next = 7;
+            _context.next = 8;
             return saveFirebase(data);
 
-          case 7:
+          case 8:
             sendFirebase = _context.sent;
             res.status(200).json({
               mail: sendMail
             });
 
-          case 9:
+          case 10:
           case "end":
             return _context.stop();
         }
@@ -122,7 +123,6 @@ function () {
                 length: 4,
                 characters: '1234'
               });
-              console.log(dateString);
               refLog.child(dateString).push({
                 nombre: data.nombre,
                 telefono: data.telefono,
