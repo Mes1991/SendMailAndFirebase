@@ -76,20 +76,22 @@ function () {
               cedula: req.body.cedula || null,
               tipoDeGestion: req.body.tipoDeGestion || null,
               email: req.body.email || null,
-              to: req.body.to || null // const sendMail = await mailer(data)
-
+              to: req.body.to || null
             };
-            sendMail = false; // const sendFirebase
+            _context.next = 6;
+            return mailer(data);
 
-            _context.next = 7;
+          case 6:
+            sendMail = _context.sent;
+            _context.next = 9;
             return saveFirebase(data);
 
-          case 7:
+          case 9:
             res.status(200).json({
               mail: sendMail
             });
 
-          case 8:
+          case 10:
           case "end":
             return _context.stop();
         }

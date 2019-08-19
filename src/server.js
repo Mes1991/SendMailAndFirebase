@@ -53,8 +53,7 @@ app.post('/senData', async (req,res) => {
     to: req.body.to || null
   }
 
-  // const sendMail = await mailer(data)
-  const sendMail = false
+  const sendMail = await mailer(data)
   // const sendFirebase
   await saveFirebase(data)
   res.status(200).json({ mail: sendMail })
