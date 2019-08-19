@@ -1,5 +1,7 @@
 "use strict";
 
+require("@babel/polyfill");
+
 var _express = _interopRequireDefault(require("express"));
 
 var firebase = _interopRequireWildcard(require("firebase"));
@@ -7,10 +9,6 @@ var firebase = _interopRequireWildcard(require("firebase"));
 var _dotenv = require("dotenv");
 
 var _cryptoRandomString = _interopRequireDefault(require("crypto-random-string"));
-
-require("core-js/stable");
-
-require("regenerator-runtime/runtime");
 
 var _nodemailer = _interopRequireDefault(require("nodemailer"));
 

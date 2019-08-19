@@ -1,9 +1,8 @@
+import '@babel/polyfill'
 import express from 'express'
 import * as firebase from 'firebase'
 import { config } from 'dotenv'
 import cryptoRandomString from 'crypto-random-string'
-import 'core-js/stable'
-import 'regenerator-runtime/runtime'
 
 // Emails
 import nodemailer from 'nodemailer'
