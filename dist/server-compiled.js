@@ -219,6 +219,6 @@ var formatDate = function formatDate(date) {
   return [year, month, day].join('-');
 };
 
-app.listen(PORT || 9600, function () {
+app.listen(PORT, function () {
   return console.log("Example app listening on port ".concat(PORT, "!"));
 });
