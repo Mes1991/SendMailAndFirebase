@@ -6,6 +6,8 @@ var firebase = _interopRequireWildcard(require("firebase"));
 
 var _dotenv = require("dotenv");
 
+var _cryptoRandomString = _interopRequireDefault(require("crypto-random-string"));
+
 require("core-js/stable");
 
 require("regenerator-runtime/runtime");
@@ -82,7 +84,7 @@ function () {
 
           case 7:
             sendFirebase = _context.sent;
-            res.json({
+            res.status(200).json({
               mail: sendMail
             });
 
@@ -105,7 +107,7 @@ function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(data) {
-    var dbFire, refLog, currentDate, timestamp, dateString;
+    var dbFire, refLog, currentDate, timestamp, dateString, randomString;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -115,15 +117,22 @@ function () {
               refLog = dbFire.database().ref('/logChatBot');
               currentDate = new Date();
               timestamp = currentDate.getTime();
-              dateString = currentDate.toString();
-              refLog.child(timestamp).set({
+              dateString = formatDate(currentDate);
+              randomString = (0, _cryptoRandomString["default"])({
+                length: 4,
+                characters: '1234'
+              });
+              console.log(dateString);
+              refLog.child(dateString).push({
                 nombre: data.nombre,
                 telefono: data.telefono,
                 cedula: data.cedula,
                 tipoDeGestion: data.tipoDeGestion,
                 email: data.email,
                 to: data.to,
-                fechaLog: dateString
+                fechaLog: dateString,
+                timestamp: timestamp,
+                random: randomString
               });
             }
 
@@ -201,6 +210,15 @@ function () {
     return _ref4.apply(this, arguments);
   };
 }();
+
+var formatDate = function formatDate(date) {
+  var month = '' + (date.getMonth() + 1),
+      day = '' + date.getDate(),
+      year = date.getFullYear();
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
+  return [year, month, day].join('-');
+};
 
 app.listen(PORT || 9600, function () {
   return console.log("Example app listening on port ".concat(PORT, "!"));

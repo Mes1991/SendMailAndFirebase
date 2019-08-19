@@ -1,6 +1,7 @@
 import express  from 'express'
 import * as firebase from 'firebase'
 import {config} from 'dotenv'
+import cryptoRandomString from 'crypto-random-string';
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 
@@ -27,7 +28,7 @@ const FIREBASECONFIG = {
 }
 
 app.post('/senData', async (req,res) => {
-
+    
     var secret = req.headers.authorization || null;
     if(!secret || secret !== process.env.SECRET) {
         return res.status(403).json({ error: 'No credentials sent!' });
@@ -45,7 +46,7 @@ app.post('/senData', async (req,res) => {
     // const sendMail = await mailer(data)
     const sendMail = false
     const sendFirebase = await saveFirebase(data)
-    res.json({ mail: sendMail})
+    res.status(200).json({ mail: sendMail})
 })
 
 const saveFirebase = async (data) => {
@@ -54,15 +55,18 @@ const saveFirebase = async (data) => {
         const refLog = dbFire.database().ref('/logChatBot')
         const currentDate = new Date()
         const timestamp = currentDate.getTime()
-        const dateString = currentDate.toString()
-        refLog.child(timestamp).set({
+        const dateString = formatDate(currentDate)
+        const randomString = cryptoRandomString({ length: 4, characters: '1234' })
+        refLog.child(dateString).push({
             nombre: data.nombre,
             telefono: data.telefono,
             cedula: data.cedula,
             tipoDeGestion: data.tipoDeGestion,
             email: data.email,
             to: data.to,
-            fechaLog: dateString
+            fechaLog: dateString,
+            timestamp: timestamp,
+            random: randomString
         })
     } 
 }
@@ -127,6 +131,15 @@ const mailer = async ({ to, nombre, telefono, cedula, email, tipoDeGestion }) =>
         console.error(e)
         return false;
     }
+}
+
+const formatDate = (date) => {
+    let month = '' + (date.getMonth() + 1),
+        day = '' + date.getDate(),
+        year = date.getFullYear()
+    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = '0' + day
+    return [year, month, day].join('-')
 }
 
 app.listen(PORT || 9600, () => console.log(`Example app listening on port ${PORT}!`))
