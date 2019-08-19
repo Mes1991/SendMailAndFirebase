@@ -169,4 +169,4 @@ const formatDate = (date) => {
   return [year, month, day].join('-')
 }
 
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+app.listen({ port: PORT }, () => console.log(`Example app listening on port ${PORT}!`))
