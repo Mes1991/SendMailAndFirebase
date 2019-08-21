@@ -63,3 +63,5 @@ typings/
 .next
 
 package-lock.json
+
+server-compiled.js
