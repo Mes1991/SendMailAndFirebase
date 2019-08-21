@@ -23,7 +23,7 @@ router.post('/sendData', async (req, res) => {
     email: req.body.email || null,
     to: req.body.to || null
   }
-  const sendMail = (req.body.tipoDeGestion !== 'testingBotd') ? await mailerOneRecord(data) : false
+  const sendMail = (req.body.tipoDeGestion !== 'testingBot') ? await mailerOneRecord(data) : false
   // const sendFirebase
   await saveFirebase(data)
   res.status(200).json({ mail: sendMail })
