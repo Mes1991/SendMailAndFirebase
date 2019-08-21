@@ -4,7 +4,7 @@ import express from 'express'
 import db from './firebaseInitialize'
 
 // Utils
-import { formatDate, fullDateConverter, mailerOneRecord, mailerMultipleRecord } from './utils'
+import { formatDate, fullDateConverter, mailerOneRecord, dailyReportEmail } from './utils'
 
 const router = express.Router()
 
@@ -32,28 +32,8 @@ router.post('/sendData', async (req, res) => {
 // api/bot/dailyReport
 router.post('/dailyReport', async (req, res) => { 
   let { fecha } = req.body
-
-  const currentDate = (fecha !== undefined) ? new Date(fecha) : new Date()
-  const dateString = formatDate(currentDate)
-  const arrayData = []
-
-  const refLog = db.database().ref('/logChatBot/' + dateString)
-  let dataVal = {}
-  const usersRef = await refLog.once('value').then(function(dataSnapshot) {
-    dataSnapshot.forEach(function(data) {
-      // console.log("The " + data.key)
-      dataVal = data.val()
-      if (dataVal !== undefined && dataVal.tipoDeGestion !== 'testingBot') {
-        arrayData.push(dataVal)
-      }
-    })
-  })
-
-  console.log(dateString)
-  const sendMail = await mailerMultipleRecord(arrayData, dateString)
-
+  let sendMail = dailyReportEmail(fecha)
   res.status(200).json({ mail: sendMail })
-
 })
 
 const saveFirebase = async (data) => {

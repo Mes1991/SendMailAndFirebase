@@ -1,7 +1,10 @@
 import express from 'express'
 import { config } from 'dotenv'
 import botDataRoute from './botDataRoute'
-// import GG from './test/test'
+// Cron
+import cron from 'node-cron'
+
+import { dailyReportEmail } from './utils'
 
 config()
 const {
@@ -10,6 +13,17 @@ const {
 
 const app = express()
 app.use(express.json())
+
+cron.schedule('01 22 * * *', async () => {
+  try {
+    let sendMail = await dailyReportEmail()
+  } catch (error) {
+    console.log('cron ' + error)
+  }
+}, {
+  scheduled: true,
+  timezone: 'America/Guatemala'
+})
 
 // Rutas
 app.use('/api/bot', botDataRoute)

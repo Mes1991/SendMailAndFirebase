@@ -1,6 +1,10 @@
 // Emails
 import nodemailer from 'nodemailer'
 import { config } from 'dotenv'
+
+// firebase
+import db from './firebaseInitialize'
+
 config()
 const {
   EMAIL_USER,
@@ -121,7 +125,7 @@ export const mailerMultipleRecord = async (data, dateString) => {
         </head>
         <body style="margin:0; padding:0; background-color:#F2F2F2;">
         <center>
-            <h2 style="margin-bottom: 2%; margin-top: 2%"> ` + dateString + `: ` + data.length + ` registros</h3>
+            <h2 style="margin-bottom: 2%; margin-top: 2%"> ` + dateString + `: ` + data.length + ` registros</h2>
             <table width="100%" border="0" cellpadding="1" cellspacing="2" bgcolor="whiteSmoke">
                 <thead>
                     <tr style='border: 1px'>
@@ -145,7 +149,7 @@ export const mailerMultipleRecord = async (data, dateString) => {
     let mailOptions = {
       from: EMAIL_USER,
       to: TO_MAIL,
-      subject: 'Bot Consolidate - ' + dateString,
+      subject: 'ChatBot Consolidate - ' + dateString,
       cc: CC,
       html: htmlTemplate
     }
@@ -155,5 +159,45 @@ export const mailerMultipleRecord = async (data, dateString) => {
     return true
   } catch (error) {
     return false
+  }
+}
+
+export const dailyReportEmail = async (fecha) => {
+  try {
+    const currentDate = (fecha !== undefined) ? new Date(fecha) : new Date()
+    const dateString = formatDate(currentDate)
+    const arrayData = []
+
+    const refLog = db.database().ref('/logChatBot/' + dateString)
+    let dataVal = {}
+    const usersRef = await refLog.once('value').then(function(dataSnapshot) {
+      dataSnapshot.forEach(function(data) {
+        // console.log("The " + data.key)
+        dataVal = data.val()
+        if (dataVal !== undefined && dataVal.tipoDeGestion !== 'testingBot') {
+          arrayData.push(dataVal)
+        }
+      })
+    })
+    const sendMail = await mailerMultipleRecord(arrayData, dateString)
+    await saveNodeCron(arrayData.length, sendMail)
+    return sendMail
+  } catch (error) {
+    return false
+  }
+}
+
+export const saveNodeCron = async (totalData, sendMail) => {
+  try {
+    const refLog = db.database().ref('/nodeCron')
+    const currentDate = new Date()
+    const fullDateString = fullDateConverter(currentDate)
+    await refLog.child(fullDateString).push({
+      totalData: totalData,
+      sendMail: sendMail
+    })
+    return true
+  } catch (error) {
+    return false 
   }
 }
