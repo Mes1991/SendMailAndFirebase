@@ -3,28 +3,17 @@ import express from 'express'
 // firebase
 import db from './firebaseInitialize'
 
-// Emails
-import nodemailer from 'nodemailer'
-
 // Utils
-import { formatDate } from './utils'
-import { config } from 'dotenv'
+import { formatDate, fullDateConverter, mailerOneRecord, mailerMultipleRecord } from './utils'
 
 const router = express.Router()
 
-config()
-const {
-    EMAIL_USER,
-    EMAIL_PASSWORD,
-    CC
-} = process.env
-
 // api/bot/sendData
 router.post('/sendData', async (req, res) => {
-    const secret = req.headers.authorization || null
-    if (secret !== process.env.SECRET) {
-      return res.status(401).json({ error: 'No credentials sent!' })
-   }
+  const secret = req.headers.authorization || null
+  if (secret !== process.env.SECRET) {
+    return res.status(401).json({ error: 'No credentials sent!' })
+  }
 
   let data = {
     nombre: req.body.nombre || null,
@@ -34,8 +23,7 @@ router.post('/sendData', async (req, res) => {
     email: req.body.email || null,
     to: req.body.to || null
   }
-
-  const sendMail = await mailer(data)
+  const sendMail = (req.body.tipoDeGestion !== 'testingBotd') ? await mailerOneRecord(data) : false
   // const sendFirebase
   await saveFirebase(data)
   res.status(200).json({ mail: sendMail })
@@ -43,90 +31,47 @@ router.post('/sendData', async (req, res) => {
 
 // api/bot/dailyReport
 router.post('/dailyReport', async (req, res) => { 
-  let { fecha, to, cc } = req.body
-  const refLog = db.database().ref('/logChatBot/2019-08-19')
-  var usersRef = refLog.once('value').then(function(dataSnapshot) {
-    dataSnapshot.forEach(function(data) {
-      console.log("The " + data.key)
-      console.log(data.val())
-    });
-  });
+  let { fecha } = req.body
 
-  res.status(200).json({ mail: true })
+  const currentDate = (fecha !== undefined) ? new Date(fecha) : new Date()
+  const dateString = formatDate(currentDate)
+  const arrayData = []
+
+  const refLog = db.database().ref('/logChatBot/' + dateString)
+  let dataVal = {}
+  const usersRef = await refLog.once('value').then(function(dataSnapshot) {
+    dataSnapshot.forEach(function(data) {
+      // console.log("The " + data.key)
+      dataVal = data.val()
+      if (dataVal !== undefined && dataVal.tipoDeGestion !== 'testingBot') {
+        arrayData.push(dataVal)
+      }
+    })
+  })
+
+  console.log(dateString)
+  const sendMail = await mailerMultipleRecord(arrayData, dateString)
+
+  res.status(200).json({ mail: sendMail })
+
 })
 
 const saveFirebase = async (data) => {
-    const refLog = db.database().ref('/logChatBot')
-    const currentDate = new Date()
-    const timestamp = currentDate.getTime()
-    const dateString = formatDate(currentDate)
-    await refLog.child(dateString).push({
-      nombre: data.nombre,
-      telefono: data.telefono,
-      cedula: data.cedula,
-      tipoDeGestion: data.tipoDeGestion,
-      email: data.email,
-      to: data.to,
-      fechaLog: dateString,
-      timestamp: timestamp
-    })
+  const refLog = db.database().ref('/logChatBot')
+  const currentDate = new Date()
+  const timestamp = currentDate.getTime()
+  const dateSimpleString = formatDate(currentDate)
+  const fullDateString = fullDateConverter(currentDate)
+  await refLog.child(dateSimpleString).push({
+    nombre: data.nombre,
+    telefono: data.telefono,
+    cedula: data.cedula,
+    tipoDeGestion: data.tipoDeGestion,
+    email: data.email,
+    to: data.to,
+    fechaLog: fullDateString,
+    timestamp: timestamp
+  })
 }
-
-const mailer = async ({ to, nombre, telefono, cedula, email, tipoDeGestion }) => {
-    // return false
-    try {
-      // create reusable transporter object using the default SMTP transport
-      let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        secure: false,
-        auth: {
-          user: EMAIL_USER, // generated ethereal user
-          pass: EMAIL_PASSWORD // generated ethereal password
-        },
-        tls: {
-          rejectUnauthorized: false
-        }
-      })
-  
-      // setup email data with unicode symbols
-      let mailOptions = {
-        from: EMAIL_USER,
-        to: to,
-        subject: tipoDeGestion,
-        cc: CC,
-        html: `<table>
-                <tr>
-                    <td>Nombre</td>
-                    <td>${nombre}</td>
-                </tr>
-                <tr>
-                    <td>Telefono</td>
-                    <td>${telefono}</td>
-                </tr>
-                <tr>
-                    <td># de cedula</td>
-                    <td>${cedula}</td>
-                </tr>
-                <tr>
-                    <td>Email</td>
-                    <td>${email}</td>
-                </tr>
-                <tr>
-                    <td>Tipo de consulta</td>
-                    <td>${tipoDeGestion}</td>
-                </tr>
-                <Table>
-                `
-      }
-  
-      // send mail with defined transport object
-      await transporter.sendMail(mailOptions)
-  
-      return true
-    } catch (e) {
-      console.error(e)
-      return false
-    }
-  }
 
 export default router
