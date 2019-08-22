@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import express from 'express'
 import { config } from 'dotenv'
 import botDataRoute from './botDataRoute'
@@ -16,7 +17,7 @@ app.use(express.json())
 
 cron.schedule('01 22 * * *', async () => {
   try {
-    let sendMail = await dailyReportEmail()
+    await dailyReportEmail()
   } catch (error) {
     console.log('cron ' + error)
   }

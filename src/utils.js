@@ -170,8 +170,8 @@ export const dailyReportEmail = async (fecha) => {
 
     const refLog = db.database().ref('/logChatBot/' + dateString)
     let dataVal = {}
-    const usersRef = await refLog.once('value').then(function(dataSnapshot) {
-      dataSnapshot.forEach(function(data) {
+    await refLog.once('value').then(function (dataSnapshot) {
+      dataSnapshot.forEach(function (data) {
         // console.log("The " + data.key)
         dataVal = data.val()
         if (dataVal !== undefined && dataVal.tipoDeGestion !== 'testingBot') {
@@ -198,6 +198,6 @@ export const saveNodeCron = async (totalData, sendMail) => {
     })
     return true
   } catch (error) {
-    return false 
+    return false
   }
 }
