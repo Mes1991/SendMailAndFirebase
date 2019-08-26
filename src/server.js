@@ -15,7 +15,7 @@ const {
 const app = express()
 app.use(express.json())
 
-cron.schedule('01 22 * * *', async () => {
+cron.schedule('07 55 * * *', async () => {
   try {
     await dailyReportEmail()
   } catch (error) {

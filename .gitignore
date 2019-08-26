@@ -63,5 +63,5 @@ typings/
 .next
 
 package-lock.json
-
+yarn.lock
 server-compiled.js
