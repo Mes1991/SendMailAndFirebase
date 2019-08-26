@@ -16,11 +16,11 @@ const {
 
 const app = express()
 
-//app.use(enforce.HTTPS({ trustProtoHeader: true }))
+app.use(enforce.HTTPS({ trustProtoHeader: true }))
 
 app.use(express.json())
 
-cron.schedule('53 08 * * *', async () => {
+cron.schedule('03 09 * * *', async () => {
   try {
     await dailyReportEmail()
   } catch (error) {
