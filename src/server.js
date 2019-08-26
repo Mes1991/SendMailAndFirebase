@@ -3,6 +3,7 @@ import express from 'express'
 import { config } from 'dotenv'
 import botDataRoute from './botDataRoute'
 import { createServer } from 'http'
+import enforce from 'express-sslify'
 // Cron
 import cron from 'node-cron'
 
@@ -14,9 +15,12 @@ const {
 } = process.env
 
 const app = express()
+
+app.use(enforce.HTTPS({ trustProtoHeader: true }))
+
 app.use(express.json())
 
-cron.schedule('25 08 * * *', async () => {
+cron.schedule('40 08 * * *', async () => {
   try {
     await dailyReportEmail()
   } catch (error) {
