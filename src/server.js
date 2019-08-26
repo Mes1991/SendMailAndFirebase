@@ -2,6 +2,7 @@ import '@babel/polyfill'
 import express from 'express'
 import { config } from 'dotenv'
 import botDataRoute from './botDataRoute'
+import { createServer } from 'http'
 // Cron
 import cron from 'node-cron'
 
@@ -15,7 +16,7 @@ const {
 const app = express()
 app.use(express.json())
 
-cron.schedule('07 55 * * *', async () => {
+cron.schedule('25 08 * * *', async () => {
   try {
     await dailyReportEmail()
   } catch (error) {
@@ -29,4 +30,6 @@ cron.schedule('07 55 * * *', async () => {
 // Rutas
 app.use('/api/bot', botDataRoute)
 
-app.listen({ port: PORT }, () => console.log(`Example app listening on port ${PORT}!`))
+const httpServer = createServer(app)
+
+httpServer.listen({ port: PORT }, () => console.log(`Example app listening on port ${PORT}!`))
