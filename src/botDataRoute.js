@@ -32,7 +32,7 @@ router.post('/sendData', async (req, res) => {
 // api/bot/dailyReport
 router.post('/dailyReport', async (req, res) => { 
   let { fecha } = req.body
-  let sendMail = dailyReportEmail(fecha)
+  let sendMail = await dailyReportEmail(fecha)
   res.status(200).json({ mail: sendMail })
 })
 
