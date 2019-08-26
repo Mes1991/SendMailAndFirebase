@@ -10,7 +10,8 @@ const {
   EMAIL_USER,
   EMAIL_PASSWORD,
   CC,
-  TO_MAIL
+  TO_CONSOLIDATE,
+  TO_INMEDIATE
 } = process.env
 
 export const formatDate = (date) => {
@@ -52,7 +53,7 @@ export const mailerOneRecord = async ({ to, nombre, telefono, cedula, email, tip
     // setup email data with unicode symbols
     let mailOptions = {
       from: EMAIL_USER,
-      to: TO_MAIL,
+      to: TO_INMEDIATE,
       subject: tipoDeGestion,
       cc: CC,
       html: `<table>
@@ -148,7 +149,7 @@ export const mailerMultipleRecord = async (data, dateString) => {
 
     let mailOptions = {
       from: EMAIL_USER,
-      to: TO_MAIL,
+      to: TO_CONSOLIDATE,
       subject: 'ChatBot Consolidate - ' + dateString,
       cc: CC,
       html: htmlTemplate

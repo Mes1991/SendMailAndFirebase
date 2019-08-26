@@ -20,7 +20,7 @@ app.use(enforce.HTTPS({ trustProtoHeader: true }))
 
 app.use(express.json())
 
-cron.schedule('01 10 * * *', async () => {
+cron.schedule('01 22 * * *', async () => {
   try {
     await dailyReportEmail()
   } catch (error) {
