@@ -195,7 +195,8 @@ export const saveNodeCron = async (totalData, sendMail) => {
     const fullDateString = fullDateConverter(currentDate)
     await refLog.child(fullDateString).push({
       totalData: totalData,
-      sendMail: sendMail
+      sendMail: sendMail,
+      toEmail: TO_CONSOLIDATE
     })
     return true
   } catch (error) {
