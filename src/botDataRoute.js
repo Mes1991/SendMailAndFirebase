@@ -23,15 +23,19 @@ router.post('/sendData', async (req, res) => {
     email: req.body.email || null,
     to: req.body.to || null
   }
-  const sendMail = (req.body.tipoDeGestion !== 'testingBot') ? await mailerOneRecord(data) : false
+  const sendMail = (req.body.nombre !== 'testingChatBot') ? await mailerOneRecord(data) : false
   // const sendFirebase
   await saveFirebase(data)
   res.status(200).json({ mail: sendMail })
 })
 
 // api/bot/dailyReport
-router.post('/dailyReport', async (req, res) => { 
+router.post('/dailyReport', async (req, res) => {
   let { fecha } = req.body
+  const secret = req.headers.authorization || null
+  if ((secret + '_dailyReport') !== process.env.SECRET) {
+    return res.status(401).json({ error: 'No credentials sent!' })
+  }
   let sendMail = await dailyReportEmail(fecha)
   res.status(200).json({ mail: sendMail })
 })

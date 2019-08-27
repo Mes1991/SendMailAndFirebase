@@ -2,6 +2,8 @@
 import nodemailer from 'nodemailer'
 import { config } from 'dotenv'
 
+import momentTZ from 'moment-timezone'
+
 // firebase
 import db from './firebaseInitialize'
 
@@ -15,23 +17,25 @@ const {
 } = process.env
 
 export const formatDate = (date) => {
-  let month = '' + (date.getMonth() + 1)
-  let day = '' + date.getDate()
-  let year = date.getFullYear()
+  const dateTimeZone = momentTZ(date).tz('America/Managua').format('YYYY-MM-DD')
+  let splitDate = dateTimeZone.split('-')
+  let month = splitDate[1] // '' + (dateTimeZone.getMonth() + 1)
+  let day = splitDate[2] // '' + dateTimeZone.getDate()
+  let year = splitDate[0] // dateTimeZone.getFullYear()
   if (month.length < 2) month = '0' + month
   if (day.length < 2) day = '0' + day
   return [year, month, day].join('-')
 }
 
-export const fullDateConverter = (date) => {
+export const fullDateConverter = (date, usingHour = true) => {
+  const dateTimeZone = momentTZ(date).tz('America/Managua').format('YYYY-M-DD-HH:mm')
+  let splitDate = dateTimeZone.split('-')
   let months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-  let year = date.getFullYear()
-  let month = months[date.getMonth()]
-  let day = date.getDate()
-  let hour = date.getHours()
-  let min = date.getMinutes()
-  let sec = date.getSeconds()
-  let time = day + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec
+  let year = splitDate[0] // dateTimeZone.getFullYear()
+  let month = months[splitDate[1] - 1]
+  let day = splitDate[2] // dateTimeZone.getDate()
+  let hour = splitDate[3] // dateTimeZone.getHours()
+  let time = day + ' ' + month + ' ' + year + ((usingHour) ? ' ' + hour : '')
   return time
 }
 
@@ -167,6 +171,7 @@ export const dailyReportEmail = async (fecha) => {
   try {
     const currentDate = (fecha !== undefined) ? new Date(fecha) : new Date()
     const dateString = formatDate(currentDate)
+    const dateFullString = fullDateConverter(currentDate, false)
     const arrayData = []
 
     const refLog = db.database().ref('/logChatBot/' + dateString)
@@ -175,12 +180,12 @@ export const dailyReportEmail = async (fecha) => {
       dataSnapshot.forEach(function (data) {
         // console.log("The " + data.key)
         dataVal = data.val()
-        if (dataVal !== undefined && dataVal.tipoDeGestion !== 'testingBot') {
+        if (dataVal !== undefined && (dataVal.nombre !== 'testingChatBot')) {
           arrayData.push(dataVal)
         }
       })
     })
-    const sendMail = await mailerMultipleRecord(arrayData, dateString)
+    const sendMail = await mailerMultipleRecord(arrayData, dateFullString)
     await saveNodeCron(arrayData.length, sendMail)
     return sendMail
   } catch (error) {
