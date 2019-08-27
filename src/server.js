@@ -3,7 +3,8 @@ import express from 'express'
 import { config } from 'dotenv'
 import botDataRoute from './botDataRoute'
 import { createServer } from 'http'
-// import enforce from 'express-sslify'
+import enforce from 'express-sslify'
+
 // Cron
 import cron from 'node-cron'
 
@@ -17,7 +18,7 @@ const {
 
 const app = express()
 
-// app.use(enforce.HTTPS({ trustProtoHeader: true }))
+app.use(enforce.HTTPS({ trustProtoHeader: true }))
 
 app.use(express.json())
 
