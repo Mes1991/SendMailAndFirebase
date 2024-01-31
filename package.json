@@ -20,7 +20,7 @@
     "firebase": "6.3.0",
     "moment-timezone": "^0.5.26",
     "node-cron": "2.0.3",
-    "nodemailer": "6.3.0"
+    "nodemailer": "6.9.8"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",
